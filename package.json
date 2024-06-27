@@ -1,0 +1,17 @@
+{
+  "name": "airtable-wa-owners-app",
+  "version": "1.0.0",
+  "description": "App to bulk send marketing message to owners listed in Airtable through Whatsapp",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Eugene Ang",
+  "license": "MIT",
+  "dependencies": {
+    "airtable": "^0.12.2",
+    "prompt-sync": "^4.2.0",
+    "qrcode-terminal": "^0.12.0",
+    "whatsapp-web.js": "^1.24.0"
+  }
+}
