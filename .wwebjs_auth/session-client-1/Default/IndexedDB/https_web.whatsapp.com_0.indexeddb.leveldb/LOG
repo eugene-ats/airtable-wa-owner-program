@@ -1,6 +1,0 @@
-2024/06/24-17:47:08.178 4350 Reusing MANIFEST C:\Users\Ang Swee Lim\Documents\eugene github\airtable wa owners app\.wwebjs_auth\session-client-1\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
-2024/06/24-17:47:08.179 4350 Recovering log #161
-2024/06/24-17:47:08.184 4350 Reusing old log C:\Users\Ang Swee Lim\Documents\eugene github\airtable wa owners app\.wwebjs_auth\session-client-1\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000161.log 
-2024/06/24-17:47:08.184 4350 Delete type=2 #158
-2024/06/24-17:47:08.184 4350 Delete type=2 #159
-2024/06/24-17:47:11.966 4350 Manual compaction at level-0 from '\x002\x00\x00\x00' @ 72057594037927935 : 1 .. '\x003\x00\x00\x00' @ 0 : 0; will stop at (end)
