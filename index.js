@@ -90,11 +90,8 @@ async function getPhoneNo() {
     const PhoneNoArray = [];
     let keyword = reqTarget();
     console.log("\nConnecting to Airtable API ...");
-
-    await base('Owner').select({
-        fields: [phoneNoFieldId, premiseField],
-        filterByFormula: createFormula(keyword)
-    }).eachPage((records, fetchNextPage) => {
+   
+    const forEachPage = (records, fetchNextPage) => {
         // This function will get called for each page of records.
         records.forEach(async record => {
             let phonoNoCell = record.get('Phone no.');
@@ -116,7 +113,18 @@ async function getPhoneNo() {
             }
         });
         fetchNextPage();
-    }).catch(error => { console.error(error); return false; })
+    }
+
+    if (keyword) {
+        await base('Owner').select({
+            fields: [phoneNoFieldId],
+            filterByFormula: createFormula(keyword)
+        }).eachPage(forEachPage).catch(error => { console.error(error); return false; }) 
+    } else {
+        await base('Owner').select({
+            fields: [phoneNoFieldId]
+        }).eachPage(forEachPage).catch(error => { console.error(error); return false; }) 
+    }
 
     // WRITE PHONE NUMBERS INTO A TXT FILE
     await createNumFile(PhoneNoArray);
