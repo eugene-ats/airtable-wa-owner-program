@@ -197,7 +197,7 @@ async function sendMsg() {
 
     // TODO: Maybe do a prompt select file
     console.log('Craft your message (Press enter to skip):\n')
-    const mediaUrl = prompt("> Image relative file path (flyer images/IMAGE NAME.jpg): ");
+    const mediaUrl = prompt("> Image relative file path (flyer/IMAGE NAME.jpg): ");
     const caption = prompt("> Message to send (Leave blank if you want to send image only): ");
     let media = false;
     if (mediaUrl.trim().length !== 0) {
@@ -208,6 +208,7 @@ async function sendMsg() {
         process.exit();
     }
 
+    let delivered = {};
     let sents = [];
     let duplicates = [];
     let invalids = [];
@@ -228,18 +229,24 @@ async function sendMsg() {
             // console.log(`Already sent number: ${number}`);
             continue;
         }
-        // try {
+        try {
+            let delivery = undefined;
             if (media == false) {
-                // await client.sendMessage(`${number}@c.us`, caption);
-                console.log('sent mssage without media to ' + number);
+                delivery = await client.sendMessage(`${number}@c.us`, caption);
+                // console.log('sent mssage without media to ' + number);
             } else {
-                // await client.sendMessage(`${number}@c.us`, media, {caption: caption});  
-                console.log('sent mssage with media to ' + number);
-            }   
+                delivery = await client.sendMessage(`${number}@c.us`, media, {caption: caption});  
+                // console.log('sent mssage with media to ' + number);
+            }  
             sents.push(number);
-        // } catch (e) {
-        //     console.log(`Error sending message: ${number}, ${e}`);
-        // }
+            let status = await delivery.getInfo();
+            if (delivery) {
+                delivered[number] = delivery;
+                // console.log(delivered);
+            }
+        } catch (e) {
+            console.log(`Error sending message: ${number}, ${e}`);
+        }
     };
     
     // OPERATION REPORT
@@ -260,9 +267,13 @@ async function sendMsg() {
 
     // TODO: Write fix.js !!
 
-    console.log("------------------------------------------");
-    client.destroy();
-    process.exit();
+    console.log("\n------------------------------------------\n");
+    
+    if (Object.keys(delivered).length == sents.length) {
+        console.log('All message have been delivered.');
+        client.destroy();
+        process.exit();
+    }
 }
 
 function listOutPhoneNo(noArr) {

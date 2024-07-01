@@ -69,7 +69,7 @@ async function sendMsg() {
 
     // TODO: Maybe do a prompt select file
     console.log('Craft your message (Press enter to skip):\n')
-    const mediaUrl = prompt("> Image relative file path (flyer images/IMAGE NAME.jpg): ");
+    const mediaUrl = prompt("> Image relative file path (flyer/IMAGE NAME.jpg): ");
     const caption = prompt("> Message to send (Leave blank if you want to send image only): ");
     let media = false;
     if (mediaUrl.trim().length !== 0) {
@@ -81,7 +81,7 @@ async function sendMsg() {
     }
 
     let sents = [];
-    let delivered = [];
+    let delivered = {};
     let invalids = [];
     for (let number of numbers) {
         number = number.trim(); 
@@ -96,7 +96,7 @@ async function sendMsg() {
         number = formatPhoneNo(number);
 
         try {
-            let delivery;
+            let delivery = undefined;
             if (media == false) {
                 delivery = await client.sendMessage(`${number}@c.us`, caption);
                 // console.log('sent mssage without media to ' + number);
@@ -106,12 +106,27 @@ async function sendMsg() {
             }  
             sents.push(number);
             let status = await delivery.getInfo();
-            console.log(status);
-            console.log("delivery remaining " + status['deliveryRemaining']);
-            if (status['deliveryRemaining'] == 0) {
-                console.log('remaing is 0');
-                delivered.push(number);
+            if (delivery) {
+                delivered[number] = delivery;
+                // console.log(delivered);
             }
+            // let remaining = status.deliveryRemaining;
+            // console.log("delivery remaining " + remaining);
+            // while (remaining > 0) {
+            //     console.log('1');
+            //     status = await delivery.getInfo();
+            //     remaining = status['deliveryRemaining'];
+            //     if (remaining == 0) {
+            //         console.log('remaing is 0');
+            //         delivered.push(number);
+            //         break;
+            //     }
+            // } 
+            // if (remaining == 0) {
+            //     console.log('remaing is zero');
+            //     delivered.push(number);
+            // }
+            
         } catch (e) {
             console.log(`Error sending message: ${number}, ${e}`);
         }
@@ -137,14 +152,15 @@ async function sendMsg() {
         await logResults(invalids, invalidsFilePath);
     }
 
-    console.log("--------------------------------------");
-    console.log("Your message is sending...");
+    console.log("\n------------------------------------------\n");
+    // console.log("\n[ Your message is sending... ]\n");
 
-    if (delivered.length == sents.length) {
-        console.log('all msg is delivered');
+    // console.log(Object.keys(delivered).length == sents.length);
+    if (Object.keys(delivered).length == sents.length) {
+        console.log('All message have been delivered.');
+        client.destroy();
+        process.exit();
     }
-    client.destroy();
-    process.exit();
 }
 
 async function logResults(noArr, path) {
