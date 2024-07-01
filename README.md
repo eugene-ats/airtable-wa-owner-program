@@ -1,18 +1,15 @@
-//  do not simply change field name in airtable
-// num.txt, duplicates.txt, invalids.txt are program generated files, not to touch them
-//
+**Bulk Send WhatsApp Message Program**
 
-* Bulk Send WhatsApp Message Program
 Description: Bulk send whatsapp message, with or without image, to phone numbers listed in Airtable database.
 
-Installation:
+## Installation:
 1. Download the repository (folder) into your own pc.
 2. Download Node.js from [Node.js](https://nodejs.org/en/download/prebuilt-installer/current)
-3. Open terminal in the project folder, then run 'npm install' command (only for the first time).
-4. Run 'node index.js' command to start the program.
+3. Open terminal in the project folder, then run `npm install` command (only for the first time).
+4. Run `node index.js` command to start the program.
 ![Command to start the program](image.png)
 
-Steps:
+## Steps:
 1. First, enter a username. The username will be used next time for easy login to WhatsApp. New username will be prompted to scan WhatsApp Web QR code to log in.
 2. For first-time user, open WhatsApp > Linked devices to scan the QR code.
 ![scan qr code](image-1.png)
@@ -21,10 +18,9 @@ Steps:
 5. Next, craft the message you want to send. You may send image only, test only, or both. For sending image, please first download your image into 'flyer' folder. Then, enter its relative path as demonstrated.
 6. The time taken for the messages to be sent to all contacts will vary depending on the number of contacts. A operation report will be printed once the operation is done.
 
-IMPORTANT NOTE:
+## IMPORTANT NOTE:
 1. Please do not alter the name of field in Airtable, as this will cause 'records not found' error.
 2. The name of the residential area enterred must be spelling correct, but does not have to be capitalized.
 3. Message are only sent to mobile contacts, i.e. the program will skip numbers begin with '03', '05', and etc.
 4. Please do not alter the structure of the project files.
 ![operation report prints](image-3.png)
-
