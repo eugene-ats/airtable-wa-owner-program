@@ -10,7 +10,6 @@ const base = new Airtable(
     {apiKey: 'patYJdMn1t77yxmVY.a1e684aa03c6cb74ce3469eabbfe7a4e83e7cc7ff7410b6bcd523841375c9e33'}
 ).base('appHFnui5sKZIuhrI');
 const phoneNoFieldId = "fldgMYGalHYXKUpfe";
-const premiseField = "fld1940nmpfJ4sbVy";
 
 const numFilePath = 'numbers.txt';
 
@@ -258,7 +257,7 @@ async function sendMsg() {
     let invalidsFilePath = "invalids.txt";
 
     // Log to files
-    let duplicatesMsg = `🔁 Found ${duplicates.length} duplicate numbers. Check ${duplicatesFilePath} for the numbers.`;
+    let duplicatesMsg = `🔁 Found ${duplicates.length} duplicate numbers. (Check ${duplicatesFilePath} for the numbers.)`;
     let invalidMsg = `⚠️ ${invalids.length} were detected invalid numbers (invalid format). \n`;
     let invalidMsg2 = `Please check from ${invalidsFilePath} to \n> Find and fix the numbers in database. \n> Fix those numbers in fix.js, then run 'node fix.js' to send message to those numbers again.\n`;
     
