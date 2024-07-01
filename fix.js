@@ -2,6 +2,7 @@ const qrcode = require("qrcode-terminal");
 const { Client, LocalAuth, MessageMedia } = require("whatsapp-web.js");
 const fsP = require("fs/promises");
 const fs = require("fs");
+const { sensitiveHeaders } = require("http2");
 const prompt = require('prompt-sync')({sigint: true});
 
 printLineBreak();
@@ -10,7 +11,7 @@ let userID = prompt('Username: ');
 
 const client = new Client({
     puppeteer: {
-        headless: true,
+        headless: false,
         args: ["--no-sandbox", "--disable-setuid-sandbox"],
     },
     authStrategy: new LocalAuth({
@@ -57,6 +58,13 @@ function formatPhoneNo(number) {
 const invalidsFilePath = "invalids.txt";
 async function sendMsg() {
     let numbers = fs.readFileSync(invalidsFilePath, "utf-8").split("\n");
+    let notEmpty = false;
+    while (!notEmpty) {
+        if (numbers[numbers.length -1] == '') {
+            numbers.pop();
+            notEmpty = false;
+        } else { notEmpty = true; }
+    }
     console.log(`[ Attempting to send message to ${numbers.length} validated numbers: ]\n`);
 
     // TODO: Maybe do a prompt select file
@@ -73,6 +81,7 @@ async function sendMsg() {
     }
 
     let sents = [];
+    let delivered = [];
     let invalids = [];
     for (let number of numbers) {
         number = number.trim(); 
@@ -87,14 +96,22 @@ async function sendMsg() {
         number = formatPhoneNo(number);
 
         try {
+            let delivery;
             if (media == false) {
-                await client.sendMessage(`${number}@c.us`, caption);
-                console.log('sent mssage without media to ' + number);
+                delivery = await client.sendMessage(`${number}@c.us`, caption);
+                // console.log('sent mssage without media to ' + number);
             } else {
-                await client.sendMessage(`${number}@c.us`, media, {caption: caption});  
-                console.log('sent mssage with media to ' + number);
-            }   
+                delivery = await client.sendMessage(`${number}@c.us`, media, {caption: caption});  
+                // console.log('sent mssage with media to ' + number);
+            }  
             sents.push(number);
+            let status = await delivery.getInfo();
+            console.log(status);
+            console.log("delivery remaining " + status['deliveryRemaining']);
+            if (status['deliveryRemaining'] == 0) {
+                console.log('remaing is 0');
+                delivered.push(number);
+            }
         } catch (e) {
             console.log(`Error sending message: ${number}, ${e}`);
         }
@@ -121,6 +138,11 @@ async function sendMsg() {
     }
 
     console.log("--------------------------------------");
+    console.log("Your message is sending...");
+
+    if (delivered.length == sents.length) {
+        console.log('all msg is delivered');
+    }
     client.destroy();
     process.exit();
 }

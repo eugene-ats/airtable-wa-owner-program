@@ -186,6 +186,13 @@ async function sendMsg() {
     await getPhoneNo();
 
     let numbers = fs.readFileSync(numFilePath, "utf-8").split("\n");
+    let notEmpty = false;
+    while (!notEmpty) {
+        if (numbers[numbers.length -1] == '') {
+            numbers.pop();
+            notEmpty = false;
+        } else { notEmpty = true; }
+    }
     console.log(`[ Sending to a total of ${numbers.length} numbers: ]\n`);
 
     // TODO: Maybe do a prompt select file
