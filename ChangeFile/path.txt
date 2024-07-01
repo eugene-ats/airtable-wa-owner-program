@@ -1,0 +1,3 @@
+airtable wa owners app\node_modules\whatsapp-web.js\src\webCache\LocalWebCache.js
+airtable wa owners app\node_modules\@pedroslopez\moduleraid\moduleraid.js
+airtable wa owners app\node_modules\whatsapp-web.js\src\util\Injected.js
