@@ -39,13 +39,28 @@ function printLineBreak() {
     console.log('\n:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:\n');  
 }
 
+function checkNumber(number) {
+    if(isNaN(number) || number.startsWith('00') || number == '' || number.length > 12) return false;
+    return true;
+}
+
+function formatPhoneNo(number) {
+    if (number.startsWith('03') || number.startsWith('603')) {
+        return null
+    } else if (number.startsWith('1')) {
+        return ('60'+number)
+    } else if (!number.startsWith('6') && number.startsWith('01')) {
+        return ('6'+number)
+    } else { return number }
+}
+
 const invalidsFilePath = "invalids.txt";
 async function sendMsg() {
     let numbers = fs.readFileSync(invalidsFilePath, "utf-8").split("\n");
     console.log(`[ Attempting to send message to ${numbers.length} validated numbers: ]\n`);
 
     // TODO: Maybe do a prompt select file
-    console.log('Craft your message (Press enter to skip):')
+    console.log('Craft your message (Press enter to skip):\n')
     const mediaUrl = prompt("> Image relative file path (flyer images/IMAGE NAME.jpg): ");
     const caption = prompt("> Message to send (Leave blank if you want to send image only): ");
     let media = false;
@@ -71,18 +86,18 @@ async function sendMsg() {
 
         number = formatPhoneNo(number);
 
-        // try {
+        try {
             if (media == false) {
-                // await client.sendMessage(`${number}@c.us`, caption);
+                await client.sendMessage(`${number}@c.us`, caption);
                 console.log('sent mssage without media to ' + number);
             } else {
-                // await client.sendMessage(`${number}@c.us`, media, {caption: caption});  
+                await client.sendMessage(`${number}@c.us`, media, {caption: caption});  
                 console.log('sent mssage with media to ' + number);
             }   
             sents.push(number);
-        // } catch (e) {
-        //     console.log(`Error sending message: ${number}, ${e}`);
-        // }
+        } catch (e) {
+            console.log(`Error sending message: ${number}, ${e}`);
+        }
     };
     
     // OPERATION REPORT
@@ -93,13 +108,17 @@ async function sendMsg() {
     // Log to files
     if (sents.length == numbers.length) {
         console.log("0 invalid number left. ");
+        await fsP.writeFile(invalidsFilePath, '', err => {
+            if (err) {
+                console.log(`Error encountered when writing to ${path}`);
+                console.error(err);
+            }
+        });
     } else {
         let leftInvalids = numbers.length - sents.length;
-        console.log(leftInvalids + "numbers are still invalid. Please check invalids.txt and fix them.");
+        console.log(leftInvalids + " numbers are still invalid. Please check invalids.txt and fix them.");
         await logResults(invalids, invalidsFilePath);
     }
-
-    // TODO: Write fix.js !!
 
     console.log("--------------------------------------");
     client.destroy();
@@ -120,7 +139,7 @@ async function logResults(noArr, path) {
 
 function listOutPhoneNo(noArr) {
     let data = '';
-    for (let i = 1; i <= noArr.length; i++) {
+    for (let i = 0; i < noArr.length; i++) {
         data = data + `${noArr[i]} \n`;
     }
     return data;

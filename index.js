@@ -48,7 +48,7 @@ client.on("ready", async () => {
 client.initialize();
 
 function printLineBreak() {
-    console.log('\n:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:\n');  
+    console.log('\n:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:\n');  
 }
 
 // USER INPUT TO SELECT TARGET OWNERS (ONLY)
@@ -189,7 +189,7 @@ async function sendMsg() {
     console.log(`[ Sending to a total of ${numbers.length} numbers: ]\n`);
 
     // TODO: Maybe do a prompt select file
-    console.log('Craft your message (Press enter to skip):')
+    console.log('Craft your message (Press enter to skip):\n')
     const mediaUrl = prompt("> Image relative file path (flyer images/IMAGE NAME.jpg): ");
     const caption = prompt("> Message to send (Leave blank if you want to send image only): ");
     let media = false;
@@ -253,14 +253,14 @@ async function sendMsg() {
 
     // TODO: Write fix.js !!
 
-    console.log("--------------------------------------");
+    console.log("------------------------------------------");
     client.destroy();
     process.exit();
 }
 
 function listOutPhoneNo(noArr) {
     let data = '';
-    for (let i = 1; i <= noArr.length; i++) {
+    for (let i = 0; i < noArr.length; i++) {
         data = data + `${noArr[i]} \n`;
     }
     return data;
