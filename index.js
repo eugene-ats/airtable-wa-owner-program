@@ -4,10 +4,16 @@ const fsP = require("fs/promises");
 const fs = require("fs");
 const prompt = require('prompt-sync')({sigint: true});
 const Airtable = require('airtable');
+const { APIKEY } = require("./auth-key.js");
+
+if (APIKEY == "") {
+    console.log("Please go to auth-key.js to enter your Airtable API key.\n");
+    process.exit();
+}
 
 // AIRTABLE PERSONAL TOKEN & DATABASE ID
 const base = new Airtable(
-    {apiKey: 'patYJdMn1t77yxmVY.a1e684aa03c6cb74ce3469eabbfe7a4e83e7cc7ff7410b6bcd523841375c9e33'}
+    {apiKey: APIKEY}
 ).base('appHFnui5sKZIuhrI');
 const phoneNoFieldId = "fldgMYGalHYXKUpfe";
 
@@ -231,14 +237,14 @@ async function sendMsg() {
         try {
             let delivery = undefined;
             if (media == false) {
-                delivery = await client.sendMessage(`${number}@c.us`, caption);
+                // delivery = await client.sendMessage(`${number}@c.us`, caption);
                 // console.log('sent mssage without media to ' + number);
             } else {
-                delivery = await client.sendMessage(`${number}@c.us`, media, {caption: caption});  
+                // delivery = await client.sendMessage(`${number}@c.us`, media, {caption: caption});  
                 // console.log('sent mssage with media to ' + number);
             }  
             sents.push(number);
-            let status = await delivery.getInfo();
+            // let status = await delivery.getInfo();
             if (delivery) {
                 delivered[number] = delivery;
                 // console.log(delivered);
@@ -268,11 +274,11 @@ async function sendMsg() {
 
     console.log("\n------------------------------------------\n");
     
-    if (Object.keys(delivered).length == sents.length) {
+    // if (Object.keys(delivered).length == sents.length) {
         console.log('All message have been delivered.');
         client.destroy();
         process.exit();
-    }
+    // }
 }
 
 function listOutPhoneNo(noArr) {
