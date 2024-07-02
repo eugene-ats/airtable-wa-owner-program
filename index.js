@@ -5,38 +5,46 @@ const fs = require("fs");
 const prompt = require('prompt-sync')({sigint: true});
 const Airtable = require('airtable');
 const { APIKEY } = require("./auth-key.js");
+const bukitTunkuDB = {
+    tableId: 'appHFnui5sKZIuhrI',
+    phoneNoFieldId: "fldgMYGalHYXKUpfe"
+};
+const condoBukitTunkuDB = {
+    tableId: 'appeuMm0pg8nI8ECn',
+    phoneNoFieldId: 'fldNBnySFvmlKyMqT'
+};
+const numFilePath = 'numbers.txt';
+const PhoneNoArray = [];
+const tables = [bukitTunkuDB, condoBukitTunkuDB];
 
 if (APIKEY == "") {
     console.log("Please go to auth-key.js to enter your Airtable API key.\n");
     process.exit();
 }
 
-// AIRTABLE PERSONAL TOKEN & DATABASE ID
-const base = new Airtable(
-    {apiKey: APIKEY}
-).base('appHFnui5sKZIuhrI');
-const phoneNoFieldId = "fldgMYGalHYXKUpfe";
-
-const numFilePath = 'numbers.txt';
+function printLineBreak() {
+    console.log('\n:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:\n');  
+}
 
 // USER SIGN IN (SESSION WILL BE STORED)
 printLineBreak();
 console.log('Who is using this app? (New name will be auto registered as a new user)');
 let userID = prompt('Username: ');
 
+
 const client = new Client({
-  puppeteer: {
-    headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
-  },
-  authStrategy: new LocalAuth({
-    clientId: userID
-  }),
-  webVersionCache: {
-    type: "remote",
-    remotePath:
-      "https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html",
-  },
+    puppeteer: {
+        headless: true,
+        args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    },
+    authStrategy: new LocalAuth({
+        clientId: userID
+    }),
+    webVersionCache: {
+        type: "remote",
+        remotePath:
+        "https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html",
+    },
 });
 console.log('\nWhatsapp client created. Generating QR code... ');
 
@@ -52,20 +60,15 @@ client.on("ready", async () => {
 
 client.initialize();
 
-function printLineBreak() {
-    console.log('\n:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:\n');  
-}
-
 // USER INPUT TO SELECT TARGET OWNERS (ONLY)
 function reqTarget() {
     console.log("\nWho are your target recipients? ");
-    console.log("1. Every owner in Bukit Tunku database.");
+    console.log("1. Every owner in Bukit Tunku.");
     console.log("2. Owners living in a certain area in Bukit Tunku only.\n");
     let ans = prompt("Target recipients (1/2) : ");
     let keyword = [];
     if (ans == '1') {
         keyword = false;
-        // console.log('sending to all owners.');
     } else if (ans == '2') {
         console.log('');
         let res = prompt("Type in your target area(s) separated by comma (e.g. Jalan girdle, Tijani 2): ");
@@ -92,7 +95,6 @@ function createFormula(keyArr) {
 
 // RETRIEVE DATA FROM AIRTABLE
 async function getPhoneNo() {
-    const PhoneNoArray = [];
     let keyword = reqTarget();
     console.log("\nConnecting to Airtable API ...");
    
@@ -120,16 +122,28 @@ async function getPhoneNo() {
         fetchNextPage();
     }
 
-    if (keyword) {
-        await base('Owner').select({
-            fields: [phoneNoFieldId],
-            filterByFormula: createFormula(keyword)
-        }).eachPage(forEachPage).catch(error => { console.error(error); return false; }) 
-    } else {
-        await base('Owner').select({
-            fields: [phoneNoFieldId]
-        }).eachPage(forEachPage).catch(error => { console.error(error); return false; }) 
+    for (let u = 0; u < tables.length; u++) {
+        let tableObj = tables[u]; 
+        let tableId = tableObj['tableId'];
+        let PNFid = tableObj['phoneNoFieldId'];     
+        
+        // AIRTABLE PERSONAL TOKEN & DATABASE ID
+        const base = new Airtable(
+            {apiKey: APIKEY}
+        ).base(tableId);
+
+        if (keyword) {
+            await base('Owner').select({
+                fields: [PNFid],
+                filterByFormula: createFormula(keyword)
+            }).eachPage(forEachPage).catch(error => { console.error(error); return false; }) 
+        } else {
+            await base('Owner').select({
+                fields: [PNFid]
+            }).eachPage(forEachPage).catch(error => { console.error(error); return false; }) 
+        }
     }
+    
 
     // WRITE PHONE NUMBERS INTO A TXT FILE
     await createNumFile(PhoneNoArray);
@@ -237,14 +251,14 @@ async function sendMsg() {
         try {
             let delivery = undefined;
             if (media == false) {
-                // delivery = await client.sendMessage(`${number}@c.us`, caption);
+                delivery = await client.sendMessage(`${number}@c.us`, caption);
                 // console.log('sent mssage without media to ' + number);
             } else {
-                // delivery = await client.sendMessage(`${number}@c.us`, media, {caption: caption});  
+                delivery = await client.sendMessage(`${number}@c.us`, media, {caption: caption});  
                 // console.log('sent mssage with media to ' + number);
             }  
             sents.push(number);
-            // let status = await delivery.getInfo();
+            let status = await delivery.getInfo();
             if (delivery) {
                 delivered[number] = delivery;
                 // console.log(delivered);
@@ -263,33 +277,35 @@ async function sendMsg() {
     let invalidsFilePath = "invalids.txt";
 
     // Log to files
-    let duplicatesMsg = `🔁 Found ${duplicates.length} duplicate numbers. (Check ${duplicatesFilePath} for the numbers.)`;
-    let invalidMsg = `⚠️ ${invalids.length} were detected invalid numbers (invalid format). \n`;
+    let duplicatesMsg = `🔁 Found ${duplicates.length} duplicate numbers. (Check ${duplicatesFilePath} for the numbers.)\n`;
+    let invalidMsg = `⚠️ ${invalids.length} were detected invalid numbers (invalid format). `;
     let invalidMsg2 = `Please check from ${invalidsFilePath} to \n> Find and fix the numbers in database. \n> Fix those numbers in fix.js, then run 'node fix.js' to send message to those numbers again.\n`;
     
-    await logResults(duplicates, duplicatesFilePath, [duplicatesMsg, " "]);
-    await logResults(invalids, invalidsFilePath, [invalidMsg, invalidMsg2]);
+    await logResults(duplicates, duplicatesFilePath, [duplicatesMsg, ""], false);
+    await logResults(invalids, invalidsFilePath, [invalidMsg, invalidMsg2], true);
 
     // TODO: Write fix.js !!
 
     console.log("\n------------------------------------------\n");
     
-    // if (Object.keys(delivered).length == sents.length) {
+    if (Object.keys(delivered).length == sents.length) {
         console.log('All message have been delivered.');
         client.destroy();
         process.exit();
-    // }
+    }
 }
 
 function listOutPhoneNo(noArr) {
     let data = '';
-    for (let i = 0; i < noArr.length; i++) {
-        data = data + `${noArr[i]} \n`;
+    if (noArr) {
+        for (let i = 0; i < noArr.length; i++) {
+            data = data + `${noArr[i]} \n`;
+        }
     }
     return data;
 }
 
-async function logResults(noArr, path, msg) {
+async function logResults(noArr, path, msg, printOut) {
     let data = listOutPhoneNo(noArr);
     
     await fsP.writeFile(path, data, err => {
@@ -299,6 +315,6 @@ async function logResults(noArr, path, msg) {
         }
     });
     console.log(msg[0]);
-    console.log(data);
-    console.log(msg[1]);
+    if (printOut) { console.log(data); } 
+    if (msg[1]) { console.log(msg[1]); }
 }
