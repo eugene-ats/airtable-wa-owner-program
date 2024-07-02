@@ -10,12 +10,13 @@ Description: Bulk send whatsapp message, with or without image, to phone numbers
 ![Command to start the program](image.png)
 
 ## Steps
-1. First, enter a username. The username will be used next time for easy login to WhatsApp. New username will be prompted to scan WhatsApp Web QR code to log in.
-2. For first-time user, open WhatsApp > Linked devices to scan the QR code.
+1. Open up terminal in the project folder, then type `node index.js` to start the program.
+2. First, enter a username. The username will be used next time for easy login to WhatsApp. New username will be prompted to scan WhatsApp Web QR code to log in.
+3. For first-time user, open WhatsApp > Linked devices to scan the QR code.
 ![scan qr code](image-1.png)
-3. Choose your group of target owners, whether are you sending to every owners or owners living in certain areas only. Enter the corresponding digit.
-4. By choosing option 2, you will be prompted to enter the residential area name, separated by commas. Please make sure the spelling is correct.
-5. Next, craft the message you want to send. You may send image only, text only, or both. For sending image, please first download your image into 'flyer' folder. Then, enter its relative path as demonstrated.
+4. Choose your group of target owners, whether are you sending to every owners or owners living in certain areas only. Enter the corresponding digit.
+5. By choosing option 2, you will be prompted to enter the residential area name, separated by commas. Please make sure the spelling is correct.
+6. Next, craft the message you want to send. You may send image only, text only, or both. For sending image, please first download your image into 'flyer' folder. Then, enter its relative path as demonstrated.
    ![image](https://github.com/eugene-ats/airtable-wa-owner-program/assets/83873822/8df502c1-ff5e-4f6f-9e38-7873795fdd7a)
 7. The time taken for the messages to be sent to all contacts will vary depending on the number of contacts. A operation report will be printed once the operation is done.
 
