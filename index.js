@@ -122,6 +122,7 @@ async function getPhoneNo() {
         fetchNextPage();
     }
 
+    // Go over Bukit Tunku table & Condo in Bukit Tunku table
     for (let u = 0; u < tables.length; u++) {
         let tableObj = tables[u]; 
         let tableId = tableObj['tableId'];
@@ -178,7 +179,7 @@ function titleCase(str) {
         splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);     
     }
     return splitStr.join(' '); 
- }
+}
 
 function removeSpecialChar(number) {
     let regex = /[^0-9]/g;
