@@ -227,6 +227,8 @@ async function sendMsg() {
         process.exit();
     }
 
+    console.log("Message is sending ...");
+
     let delivered = {};
     let sents = [];
     let duplicates = [];
