@@ -122,6 +122,7 @@ async function getPhoneNo() {
         fetchNextPage();
     }
 
+    // Go over Bukit Tunku table & Condo in Bukit Tunku table
     for (let u = 0; u < tables.length; u++) {
         let tableObj = tables[u]; 
         let tableId = tableObj['tableId'];
@@ -178,7 +179,7 @@ function titleCase(str) {
         splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);     
     }
     return splitStr.join(' '); 
- }
+}
 
 function removeSpecialChar(number) {
     let regex = /[^0-9]/g;
@@ -200,15 +201,20 @@ function formatPhoneNo(number) {
     } else { return number }
 }
 
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 // SEND CUSTOM MESSAGE TO SELECTED GROUP OF OWNERS
 async function sendMsg() {
-    await getPhoneNo();
+    // await getPhoneNo();
 
     let numbers = fs.readFileSync(numFilePath, "utf-8").split("\n");
     let notEmpty = false;
+    // Check if the last line is an empty line
     while (!notEmpty) {
         if (numbers[numbers.length -1] == '') {
-            numbers.pop();
+            numbers.pop();  // Remove empty line
             notEmpty = false;
         } else { notEmpty = true; }
     }
@@ -222,19 +228,19 @@ async function sendMsg() {
     if (mediaUrl.trim().length !== 0) {
         media = MessageMedia.fromFilePath(mediaUrl);
     } else if (caption.trim().length === 0 && media == false) {
-        console.warn('You cannot send an empty message.');
+        console.warn('You cannot send an empty message.');  // Check if both inputs are empty
         client.destroy();
         process.exit();
     }
 
-    console.log("Message is sending ...");
+    console.log("\nYour message is sending ...");
 
     let delivered = {};
     let sents = [];
     let duplicates = [];
     let invalids = [];
-    for (let number of numbers) {
-        number = number.trim(); 
+    for (let i = 0; i < numbers.length; i++) {
+        let number = numbers[i].trim(); 
 
         if (!checkNumber(number)) {
             invalids.push(number);
@@ -251,7 +257,8 @@ async function sendMsg() {
             continue;
         }
         try {
-            let delivery = undefined;
+            await delay(30000);  // 30-second delay between messages
+            let delivery = undefined; 
             if (media == false) {
                 delivery = await client.sendMessage(`${number}@c.us`, caption);
                 // console.log('sent mssage without media to ' + number);
@@ -266,7 +273,28 @@ async function sendMsg() {
                 // console.log(delivered);
             }
         } catch (e) {
-            console.log(`Error sending message: ${number}, ${e}`);
+            console.log(`Error sending message to ${number}: ${e.message}`);
+            // Retry logic
+            for (let attempt = 1; attempt <= 3; attempt++) {
+                try {
+                    await delay(10000); // 10-second delay before retry
+                    let delivery = await client.sendMessage(`${number}@c.us`, media ? media : caption, { caption });
+                    sents.push(number);
+                    if (delivery) {
+                        delivered[number] = delivery;
+                    }
+                    break; // Break the retry loop on success
+                } catch (retryError) {
+                    console.log(`Retry ${attempt} failed for ${number}: ${retryError.message}`);
+                    if (attempt === 3) {
+                        console.log(`Failed to send message to ${number} after 3 retries.`);
+                    }
+                }
+            }
+        }
+        if ((i + 1) % 50 === 0) {
+            console.log('Taking a 10-minutes break...');
+            await delay(600000); // 5-minute delay after every 50 messages
         }
     };
     
