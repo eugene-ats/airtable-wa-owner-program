@@ -207,7 +207,7 @@ function delay(ms) {
 
 // SEND CUSTOM MESSAGE TO SELECTED GROUP OF OWNERS
 async function sendMsg() {
-    // await getPhoneNo();
+    await getPhoneNo();
 
     let numbers = fs.readFileSync(numFilePath, "utf-8").split("\n");
     let notEmpty = false;

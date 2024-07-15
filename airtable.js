@@ -101,7 +101,6 @@ async function getPhoneNo() {
 
 async function createNumFile(phoneNoArray, nameArray) {
     // Overwriting existing data so that the line start fresh
-    console.log('\nGenerating phone number list.');
 
     let notEmpty = false;
     // Check if the last line is an empty line
@@ -112,7 +111,6 @@ async function createNumFile(phoneNoArray, nameArray) {
         } else { notEmpty = true; }
     }
     phoneNoArray = phoneNoArray.map(formatPhoneNo);
-    console.log(`[ Writing a total of ${phoneNoArray.length} numbers into csv file: ]\n`);
 
     let written = [];
     await fsP.writeFile(numListCsv, `${nameArray[0]},${phoneNoArray[0]}`, err => {
@@ -136,24 +134,28 @@ async function createNumFile(phoneNoArray, nameArray) {
         written.push(num);
     };
     printLineBreak();
-    console.log('\nFile generated: ' +numListCsv);
+    console.log(`[ A total of ${phoneNoArray.length} numbers is retrieved: ]`);
+    console.log('\n * ' +numListCsv+ ' * file generated.');
 
-    await fsP.writeFile(invalidsFilePath, invalids[0], err => {
-        if (err) {
-            console.log('Error encountered when writing to numbers.txt');
-            console.error(err);
-        }
-    });
-    // Append the remaining numbers to the file
-    for (let i=1; i<invalids.length; i++) {
-        let num = invalids[i];
-        // if (num.trim().length === 0) {continue}
-        let data = "\n" + num;
-        await fsP.appendFile(invalidsFilePath, data, err => {
-            if (err) {console.error(err);}
+    if (invalids.length > 0) {
+        await fsP.writeFile(invalidsFilePath, invalids[0], err => {
+            if (err) {
+                console.log('Error encountered when writing to numbers.txt');
+                console.error(err);
+            }
         });
-    };
-    console.log('\n' + invalids.length + ' invalid numbers found: ' +invalidsFilePath);
+        // Append the remaining numbers to the file
+        for (let i=1; i<invalids.length; i++) {
+            let num = invalids[i];
+            // if (num.trim().length === 0) {continue}
+            let data = "\n" + num;
+            await fsP.appendFile(invalidsFilePath, data, err => {
+                if (err) {console.error(err);}
+            });
+        };
+    }
+    console.log('\nA total of ' + invalids.length + ' invalid numbers is found. Please check ' +invalidsFilePath + '\n');
+    printLineBreak();
     // return;
 }
 
