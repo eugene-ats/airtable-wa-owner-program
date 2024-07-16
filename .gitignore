@@ -5,3 +5,5 @@ invalids.txt
 numbers.txt
 auth-key.js
 list.csv
+number_list_bulk.csv
+number_list_manual*.txt

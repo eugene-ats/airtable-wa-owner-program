@@ -13,12 +13,18 @@ const condoBukitTunkuDB = {
     phoneNoFieldId: 'fldNBnySFvmlKyMqT',
     nameFieldId: "fldCqbAYxHFzjjJnk"
 };
-const numListCsv = 'list.csv';
+const numListCsv = 'number_list_bulk.csv';
 const invalidsFilePath = 'invalids.txt';
 const PhoneNoArray = [];
 const NameArray = [];
 const invalids = [];
 const tables = [bukitTunkuDB, condoBukitTunkuDB];
+const today = new Date();
+const dd = String(today.getDate()).padStart(2, '0');
+const mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+const yyyy = today.getFullYear();
+
+let date = yyyy + mm + dd;
 
 if (APIKEY == "") {
     console.log("Please go to auth-key.js to enter your Airtable API key.\n");
@@ -110,6 +116,9 @@ async function createNumFile(phoneNoArray, nameArray) {
             notEmpty = false;
         } else { notEmpty = true; }
     }
+    if (phoneNoArray.length == 0) {
+        console.log("There's no valid phone number found. Please try again. ");
+    }
     phoneNoArray = phoneNoArray.map(formatPhoneNo);
 
     let written = [];
@@ -121,6 +130,8 @@ async function createNumFile(phoneNoArray, nameArray) {
     });
     written.push(phoneNoArray[0]);
 
+    const numfileManual = "number_list_MANUAL_" + date+ ".txt";
+
     // Append the remaining numbers to the file
     for (let i=1; i<phoneNoArray.length; i++) {
         let name = nameArray[i];
@@ -128,14 +139,32 @@ async function createNumFile(phoneNoArray, nameArray) {
         if (written.includes(num)) { continue }
         if (num.trim().length === 0) {continue}
         let data = `\n${name},${num}`;
-        await fsP.appendFile(numListCsv, data, err => {
-            if (err) {console.error(err);}
-        });
+
+        let min = 10;
+        let arrayPartial;
+        if (phoneNoArray.length < 30) {
+            arrayPartial = Math.round(phoneNoArray.length * 0.25);
+            min = 1;
+        } else { arrayPartial = Math.round(phoneNoArray.length * 0.1); }
+
+        let numOfManual = Math.max(min, arrayPartial);
+        if (i >= phoneNoArray.length-numOfManual) {
+            await fsP.appendFile(numfileManual, data, err => {
+                if (err) {console.error(err);}
+            });
+        } else {
+            await fsP.appendFile(numListCsv, data, err => {
+                if (err) {console.error(err);}
+            });
+        }
         written.push(num);
     };
     printLineBreak();
     console.log(`[ A total of ${phoneNoArray.length} numbers is retrieved: ]`);
     console.log('\n * ' +numListCsv+ ' * file generated.');
+    console.log(`^ Upload the above file into the WhatsApp Business Sender App.`);
+    console.log("\nWhile the bulk sender campaign is running, do also manually send flyers via phone. (to avoid getting banned)");
+    console.log(`The contacts you need to send manually have been saved separately into ${numfileManual}.`);
 
     if (invalids.length > 0) {
         await fsP.writeFile(invalidsFilePath, invalids[0], err => {
@@ -154,7 +183,7 @@ async function createNumFile(phoneNoArray, nameArray) {
             });
         };
     }
-    console.log('\nA total of ' + invalids.length + ' invalid numbers is found. Please check ' +invalidsFilePath + '\n');
+    console.log('\n! A total of ' + invalids.length + ' invalid numbers is found.');
     printLineBreak();
     // return;
 }
